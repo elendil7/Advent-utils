@@ -1,0 +1,7 @@
+.eggs
+.pytest_cache
+adventutils.egg-info
+build
+dist
+data
+*__pycache__
