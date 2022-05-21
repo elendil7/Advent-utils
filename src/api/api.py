@@ -3,6 +3,7 @@ import os
 import requests
 import appdirs
 from bs4 import BeautifulSoup
+from datetime import date
 
 
 class Api:
@@ -29,7 +30,7 @@ class Api:
             year (int): which year you want to download from
 
         Returns:
-            Union[str, int]: returns a 0 if an error has occured else returns a string
+            Union[str, int]: returns an int if an error has occured else returns a string
         """
 
         # checks if the day is within the correct bounds
@@ -57,7 +58,12 @@ class Api:
                 cookies=self.cookies)
 
             if not resq.ok:
-                print("error", resq.status_code, "raised")
+                code = resq.status_code
+                print("error", code, "raised")
+                if code == 404:
+                    print("This day is not available yet")
+                elif code == 400:
+                    print("invalid credentials")
                 return 0
 
             with open(os.path.join(self.cachedir, str(year)+str(day)), "w") as fp:
@@ -86,9 +92,40 @@ class Api:
             data={"level": str(level), "answer": str(answer)})
 
         parsed = BeautifulSoup(resq.text, "html.parser")
-        message = parsed.article.text.lower()
-        answerstat = message.split(";")[0]
+        answerstat = parsed.article.text.lower().split(";")[0]
 
-        print(answerstat)
+        if "not the right answer" in answerstat:
+            print("Wrong answer")
+            return 2
 
-# TODO: add more logging and use the error codes from the requests
+        elif "answer too recently" in answerstat:
+            print("You gave an answer too recently")
+            return 1
+
+        elif "did you already complete it" in answerstat:
+            print("You have already solved this")
+            return 0
+
+        elif "you need to actually provide an answer" in answerstat:
+            print("provide a proper input")
+            return 3
+
+    def submit_today_level1(self, answer: str, overridelevel1=False):
+        """submits an answer for the advent of code using todays date and level 1
+
+
+        Args:
+            answer (str): the answer of the day
+            overridelevel1 (bool, optional): if true sends to level 1 not 2. Defaults to False.
+        """
+        today = date.today()
+        year = today.year()
+        day = today.day()
+
+        if overridelevel1:
+            self.submit(year, day, 1, answer)
+        else:
+            self.submit(year, day, 2, answer)
+
+    def submit_today_level2(self, answer: str):
+        self.submit_today_level1(overridelevel1=True)

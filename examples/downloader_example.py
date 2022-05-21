@@ -10,3 +10,9 @@ dl.get_data(2021, 1)
 
 # submits the answer to 2021 day 1 level 2
 dl.submit(2021, 1, 2, "answer")
+
+# submits the answer to level 1 of the current day
+dl.submit_today_level1("answer")
+
+# submits the answer to level 2 of the current day
+dl.submit_today_level2("answer")
