@@ -34,7 +34,7 @@ class Api:
         """
 
         # checks if the day is within the correct bounds
-        if 0 >= day > 31:
+        if day > 0 and day <= 25:
 
             print("invalid day")
             return 0
